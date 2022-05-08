@@ -1,3 +1,5 @@
+import copy
+
 import numpy as np
 
 dt = 60
@@ -10,6 +12,11 @@ t = np.linspace(0, sim_len, num=sim_len + 1)
 t = t.astype(int)
 hours = t * (dt / 60) / 60
 days = hours / 24
+collective_hor = True
+forecast_hor = 3
+if collective_hor:
+    prediction_hor = copy.copy(forecast_hor)
+    control_hor = copy.copy(forecast_hor)
 
 standard_size = 20
 n_tanks = np.array([30, 35, 25, 50])
