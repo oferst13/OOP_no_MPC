@@ -13,7 +13,20 @@ class Tank:
         self.cur_storage = init_storage
         self.overflows = np.zeros(cfg.sim_len)
 
+    def set_storage(self):
+        pass
 
-t = Tank(10, 0)
-print(t.cur_storage)
-print(np.zeros(100))
+    def get_storage(self):
+        pass
+
+    def set_overflow(self):
+        pass
+
+    def get_overflow(self):
+        pass
+
+    def set_release(self):
+        pass
+
+    def tot_outflow(self):
+        pass
