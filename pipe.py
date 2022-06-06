@@ -4,7 +4,8 @@ import cfg
 
 class Pipe:
 
-    def __init__(self, length, diameter, slope):
+    def __init__(self, name,  length, diameter, slope):
+        self.name = name
         self.length = length
         self.diameter = diameter
         self.slope = slope

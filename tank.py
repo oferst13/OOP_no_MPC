@@ -5,7 +5,8 @@ import cfg
 class Tank:
     standard_size = 20
 
-    def __init__(self, n_tanks, init_storage, roof):
+    def __init__(self, name, n_tanks, init_storage, roof):
+        self.name = name
         self.n_tanks = n_tanks
         self.init_storage = init_storage
         self.roof = roof
