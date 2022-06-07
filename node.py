@@ -7,3 +7,5 @@ class Node:
         self.name = name
         self.receiving_from = receiving_from
         self.giving_to = giving_to
+    def get_outlet_q(self):
+        pass
