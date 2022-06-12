@@ -30,7 +30,8 @@ def rw_use(tank_storage, demand):
 def q_calc(q_in, pipe_n, timestep):
     inlet_A = (q_in / cfg.pipe_alphas[pipe_n]) ** (1 / cfg.beta)
     constant = cfg.pipe_alphas[pipe_n] * cfg.beta * (cfg.dt / cfg.pipes_L[pipe_n])
-    out_A = pipe_out_A[pipe_n, timestep - 1] - constant * (((inlet_A + cfg.pipe_out_A[pipe_n, timestep - 1]) / 2) ** (cfg.beta - 1)) * \
+    out_A = pipe_out_A[pipe_n, timestep - 1] - constant * (
+                ((inlet_A + cfg.pipe_out_A[pipe_n, timestep - 1]) / 2) ** (cfg.beta - 1)) * \
             (pipe_out_A[pipe_n, timestep - 1] - inlet_A)
     out_Q = pipe_alphas[pipe_n] * (out_A ** beta)
     kinematic_res = namedtuple("q_result", ["outlet_A", "outlet_Q"])
@@ -68,3 +69,10 @@ def model(pipe_flow, outlet_flow, timestep, alphas, last_pipe_out_A, pipe_length
     kinematic_result = funx.q_calc(pipe_Q[5, i, 0], 5, i, alphas, pipe_out_A, pipes_L, beta, dt)
     pipe_out_A[5, i] = kinematic_result.outlet_A
     pipe_Q[5, i, 1] = kinematic_result.outlet_Q
+
+
+def set_rain_input(rainfile, rain_dt, duration):
+    rain = np.zeros(int(duration / (rain_dt/cfg.dt)))
+    rain_input = np.genfromtxt(rainfile, delimiter=',')
+    rain[:len(rain_input)] = rain_input
+    return rain

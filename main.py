@@ -1,15 +1,21 @@
 import copy
+
+import funx
 from tank import Tank
 from pipe import Pipe
 from node import Node
 import cfg
 import numpy as np
 
+demands = np.array([])
+for demand in cfg.demands_3h:
+    demands = np.append(demands, np.ones(int(cfg.demand_dt / cfg.dt)) * (demand * (cfg.dt / cfg.demand_dt)))
+demand_PD = demands * cfg.PD / 100
 
-tank1 = Tank('tank1', 30, 0, 9000)
-tank2 = Tank('tank2', 35, 0, 10000)
-tank3 = Tank('tank3', 25, 0, 8500)
-tank4 = Tank('tank4', 50, 0, 14000)
+tank1 = Tank('tank1', 30, 0, 9000, 180)
+tank2 = Tank('tank2', 35, 0, 10000, 190)
+tank3 = Tank('tank3', 25, 0, 8500, 150)
+tank4 = Tank('tank4', 50, 0, 14000, 650)
 
 outlet1 = Pipe('outlet1', 250, 0.4, 0.02)
 outlet2 = Pipe('outlet2', 330, 0.4, 0.015)
@@ -31,6 +37,11 @@ node2 = Node('node2', [pipe4, pipe5], [pipe6])
 node21 = Node('node21', [outlet4], [pipe5])
 outfall = Node('outfall', [pipe6])
 
-print(outfall.giving_to)
+# Create forecast - currently real rain only!
+forecast_rain = funx.set_rain_input('09-10.csv', cfg.rain_dt, cfg.sim_len)
+for tank in Tank.all_tanks:
+    tank.set_rain_forecast(forecast_rain)
+
+print('d')
 
 
