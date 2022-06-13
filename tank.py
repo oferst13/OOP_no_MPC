@@ -1,3 +1,5 @@
+import copy
+
 import numpy as np
 import cfg
 
@@ -17,6 +19,7 @@ class Tank:
         self.cur_storage = init_storage
         self.cur_sim_storage = init_storage
         self.overflows = np.zeros(cfg.sim_len)
+        self.rw_supply = np.zeros(cfg.sim_len)
         self.in_volume_forecast = None
         self.in_volume_actual = None
         self.daily_demands = None # currently with dt only
@@ -44,5 +47,20 @@ class Tank:
         self.in_volume_forecast = rain * self.roof / 1000
 
     def set_demands(self, demand_pattern):
-        self.daily_demands = self.dw
+        self.daily_demands = demand_pattern * self.dwellers
+
+    def tank_fill(self, cur_rain_volume, timestep):
+        self.cur_storage += cur_rain_volume
+        if self.cur_storage > self.tank_size:
+            overflow = self.cur_storage - self.tank_size
+            self.cur_storage = self.tank_size
+            self.overflows[timestep] = overflow
+
+    def rw_use(self, demand, timestep):
+        self.cur_storage -= demand
+        self.rw_supply[timestep] = copy.copy(demand)
+        if self.cur_storage < 0:
+            self.cur_storage += demand
+            self.rw_supply[timestep] = copy.copy(self.cur_storage)
+            self.cur_storage = 0
 

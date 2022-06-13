@@ -40,8 +40,13 @@ outfall = Node('outfall', [pipe6])
 # Create forecast - currently real rain only!
 forecast_rain = funx.set_rain_input('09-10.csv', cfg.rain_dt, cfg.sim_len)
 for tank in Tank.all_tanks:
-    tank.set_rain_forecast(forecast_rain)
+    tank.set_rain_forecast(forecast_rain)  # happens once a forecast is made
+    tank.set_demands(demand_PD)  # happens only once
 
+# starting main sim loop
+
+for i in range(cfg.sim_len):
+    for tank in Tank.all_tanks:
+        current_rain_volume = tank.in_volume_forecast[int(i // (cfg.rain_dt / cfg.dt))] * (cfg.dt/cfg.rain_dt)
+        tank.tank_fill(current_rain_volume, i)
 print('d')
-
-
