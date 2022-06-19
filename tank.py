@@ -28,8 +28,12 @@ class Tank:
     def set_storage(self):
         pass
 
-    def get_storage(self):
-        pass
+    @classmethod
+    def get_tot_storage(cls):
+        tot_storage: float = 0
+        for tank in cls.all_tanks:
+            tot_storage += tank.cur_storage
+        return tot_storage
 
     def set_overflow(self):
         pass
@@ -47,7 +51,7 @@ class Tank:
         self.in_volume_forecast = rain * self.roof / 1000
 
     def set_demands(self, demand_pattern):
-        self.daily_demands = demand_pattern * self.dwellers
+        self.daily_demands = demand_pattern * self.dwellers / 1000
 
     def tank_fill(self, cur_rain_volume, timestep):
         self.cur_storage += cur_rain_volume

@@ -34,10 +34,6 @@ tank_alphas = (0.501 / manning) * (tank_Ds ** (1 / 6)) * (tank_slopes ** 0.5)
 demand_dt = 3 * 60 * 60
 demands_3h = np.array([5, 3, 20, 15, 12, 15, 18, 12])
 PD = 33
-demands = np.array([])
-for demand in demands_3h:
-    demands = np.append(demands, np.ones(int(demand_dt / dt)) * (demand * (dt / demand_dt)))
-demand_PD = demands * PD / 100
 
 pipes_L = np.array([400, 500, 400, 400, 300, 200])
 pipe_Ds = np.array([0.4, 0.6, 0.4, 0.8, 0.4, 0.8])
