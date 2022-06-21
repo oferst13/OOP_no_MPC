@@ -11,5 +11,10 @@ class Node:
         self.giving_to = giving_to
         Node.all_nodes.append(self)
 
-    def get_outlet_q(self):
-        pass
+    def pass_flow(self, timestep):
+        inflow: float = 0
+        for pipe in self.receiving_from:
+            inflow += pipe.outlet_Q[timestep]
+        for pipe in self.giving_to:
+            pipe.inlet_Q[timestep] = inflow / len(self.giving_to)
+
