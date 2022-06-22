@@ -22,5 +22,9 @@ class Pipe:
         out_A = last_outlet_A - constant * (((inlet_A + last_outlet_A) / 2) ** (cfg.beta - 1)) * (last_outlet_A - inlet_A)
         self.outlet_Q[timestep] = self.alpha * (out_A ** cfg.beta)
 
-    def set_q_outlet(self):
-        pass
+    @classmethod
+    def get_tot_Q(cls, timestep):
+        tot_Q: float = 0
+        for pipe in cls.all_pipes:
+            tot_Q += pipe.inlet_Q[timestep] + pipe.outlet_Q[timestep]
+        return tot_Q

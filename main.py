@@ -29,6 +29,11 @@ pipe4 = Pipe('pipe4', 400, 0.8, 0.0088)
 pipe5 = Pipe('pipe5', 300, 0.4, 0.005)
 pipe6 = Pipe('pipe6', 200, 0.8, 0.01)
 
+tank1_out = Node('tank1_out', [tank1], [outlet1])
+tank2_out = Node('tank1_out', [tank2], [outlet2])
+tank3_out = Node('tank1_out', [tank3], [outlet3])
+tank4_out = Node('tank1_out', [tank4], [outlet4])
+
 node111 = Node('node111', [outlet1], [pipe1])
 node11 = Node('node11', [pipe1, outlet2], [pipe2])
 node1 = Node('node1', [pipe2, pipe3], [pipe4])
@@ -47,9 +52,10 @@ for tank in Tank.all_tanks:
 
 for i in range(cfg.sim_len):
     if sum(forecast_rain[int(i // (cfg.rain_dt / cfg.dt)):-1]) + Tank.get_tot_storage() == 0:
-        break  # this should break forecast only!
+        break  # this should break forecast run only!
     for tank in Tank.all_tanks:
         current_rain_volume = tank.in_volume_forecast[int(i // (cfg.rain_dt / cfg.dt))] * (cfg.dt/cfg.rain_dt)
         tank.tank_fill(current_rain_volume, i)
         tank.rw_use(tank.daily_demands[i % tank.daily_demands.shape[0]], i)
+
 print('d')

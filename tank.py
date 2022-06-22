@@ -8,8 +8,7 @@ class Tank:
     standard_size = 20
     all_tanks = []
 
-    def __init__(self, name, n_tanks, init_storage, roof, dwellers
-                 ):
+    def __init__(self, name, n_tanks, init_storage, roof, dwellers):
         self.name = name
         self.n_tanks = n_tanks
         self.init_storage = init_storage
@@ -19,6 +18,7 @@ class Tank:
         self.cur_storage = init_storage
         self.cur_sim_storage = init_storage
         self.overflows = np.zeros(cfg.sim_len)
+        self.releases = np.zeros(cfg.sim_len)
         self.rw_supply = np.zeros(cfg.sim_len)
         self.in_volume_forecast = None
         self.in_volume_actual = None
