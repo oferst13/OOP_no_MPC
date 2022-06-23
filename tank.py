@@ -35,8 +35,12 @@ class Tank:
             tot_storage += tank.cur_storage
         return tot_storage
 
-    def set_overflow(self):
-        pass
+    @classmethod
+    def get_tot_overflow(cls, timestep):
+        tot_overflow: float = 0
+        for tank in cls.all_tanks:
+            tot_overflow += (tank.overflows[timestep] / cfg.dt)
+        return tot_overflow
 
     def get_overflow(self):
         pass
