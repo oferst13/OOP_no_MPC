@@ -29,10 +29,10 @@ pipe4 = Pipe('pipe4', 400, 0.8, 0.0088)
 pipe5 = Pipe('pipe5', 300, 0.4, 0.005)
 pipe6 = Pipe('pipe6', 200, 0.8, 0.01)
 
-tank1_out = Node('tank1_out', [tank1], [outlet1])
-tank2_out = Node('tank1_out', [tank2], [outlet2])
-tank3_out = Node('tank1_out', [tank3], [outlet3])
-tank4_out = Node('tank1_out', [tank4], [outlet4])
+tank1_out = Node('tank1_out', [tank1], [outlet1], tank_node=True)
+tank2_out = Node('tank1_out', [tank2], [outlet2], tank_node=True)
+tank3_out = Node('tank1_out', [tank3], [outlet3], tank_node=True)
+tank4_out = Node('tank1_out', [tank4], [outlet4], tank_node=True)
 
 node111 = Node('node111', [outlet1], [pipe1])
 node11 = Node('node11', [pipe1, outlet2], [pipe2])
@@ -42,6 +42,7 @@ node2 = Node('node2', [pipe4, pipe5], [pipe6])
 node21 = Node('node21', [outlet4], [pipe5])
 outfall = Node('outfall', [pipe6])
 
+tot_Q = np.zeros(cfg.sim_len, dtype=np.longfloat)
 # Create forecast - currently real rain only!
 forecast_rain = funx.set_rain_input('09-10.csv', cfg.rain_dt, cfg.sim_len)
 for tank in Tank.all_tanks:
@@ -57,5 +58,15 @@ for i in range(cfg.sim_len):
         current_rain_volume = tank.in_volume_forecast[int(i // (cfg.rain_dt / cfg.dt))] * (cfg.dt/cfg.rain_dt)
         tank.tank_fill(current_rain_volume, i)
         tank.rw_use(tank.daily_demands[i % tank.daily_demands.shape[0]], i)
+    if tank1.overflows[i] > 0:
+        print('work!')
+    if i < 1 or Pipe.get_tot_Q(i-1) < 1e-7:
+        tot_Q[i-1] = Pipe.get_tot_Q(i-1)
+        continue
+
+    for node in Node.all_nodes:
+        node.handle_flow(i)
+        for pipe in node.giving_to:
+            pipe.calc_q_outlet(i)
 
 print('d')

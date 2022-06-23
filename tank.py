@@ -17,7 +17,7 @@ class Tank:
         self.tank_size = self.n_tanks * self.standard_size
         self.cur_storage = init_storage
         self.cur_sim_storage = init_storage
-        self.overflows = np.zeros(cfg.sim_len)
+        self.overflows = np.zeros(cfg.sim_len, dtype=np.longfloat)
         self.releases = np.zeros(cfg.sim_len)
         self.rw_supply = np.zeros(cfg.sim_len)
         self.in_volume_forecast = None

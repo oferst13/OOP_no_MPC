@@ -11,8 +11,8 @@ class Pipe:
         self.diameter = diameter
         self.slope = slope
         self.alpha = (0.501 / cfg.manning) * (diameter ** (1 / 6)) * (slope ** 0.5)
-        self.inlet_Q = np.zeros(cfg.sim_len)
-        self.outlet_Q = np.zeros(cfg.sim_len)
+        self.inlet_Q = np.zeros(cfg.sim_len, dtype=np.longfloat)
+        self.outlet_Q = np.zeros(cfg.sim_len, dtype=np.longfloat)
         Pipe.all_pipes.append(self)
 
     def calc_q_outlet(self, timestep):
