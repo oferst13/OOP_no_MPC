@@ -42,6 +42,13 @@ class Tank:
             tot_overflow += (tank.overflows[timestep] / cfg.dt)
         return tot_overflow
 
+    @classmethod
+    def get_cum_overflow(cls):
+        cum_overflow = np.zeros(cfg.sim_len)
+        for tank in cls.all_tanks:
+            cum_overflow += tank.overflows
+        return np.sum(cum_overflow)
+
     def get_overflow(self):
         pass
 

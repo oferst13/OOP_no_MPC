@@ -1,12 +1,15 @@
 import copy
-
+from scipy import integrate
 import funx
 from tank import Tank
 from pipe import Pipe
 from node import Node
 import cfg
 import numpy as np
+from timer import Timer
 
+runtime = Timer()
+runtime.start()
 demands = np.array([])
 for demand in cfg.demands_3h:
     demands = np.append(demands, np.ones(int(cfg.demand_dt / cfg.dt)) * (demand * (cfg.dt / cfg.demand_dt)))
@@ -36,10 +39,10 @@ tank4_out = Node('tank1_out', [tank4], [outlet4], tank_node=True)
 
 node111 = Node('node111', [outlet1], [pipe1])
 node11 = Node('node11', [pipe1, outlet2], [pipe2])
-node1 = Node('node1', [pipe2, pipe3], [pipe4])
 node12 = Node('node12', [outlet3], [pipe3])
-node2 = Node('node2', [pipe4, pipe5], [pipe6])
+node1 = Node('node1', [pipe2, pipe3], [pipe4])
 node21 = Node('node21', [outlet4], [pipe5])
+node2 = Node('node2', [pipe4, pipe5], [pipe6])
 outfall = Node('outfall', [pipe6])
 
 tot_Q = np.zeros(cfg.sim_len, dtype=np.longfloat)
@@ -64,5 +67,7 @@ for i in range(cfg.sim_len):
         node.handle_flow(i)
         for pipe in node.giving_to:
             pipe.calc_q_outlet(i)
-
+mass_balance_err = 100 * (abs(integrate.simps(pipe6.outlet_Q * cfg.dt, cfg.t[:-1]) - Tank.get_cum_overflow())) / Tank.get_cum_overflow()
+print(f"Mass Balance Error: {mass_balance_err:0.2f}%")
+runtime.stop()
 print('d')
