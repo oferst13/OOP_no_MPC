@@ -8,6 +8,25 @@ import cfg
 import numpy as np
 from timer import Timer
 
+
+def run_model(runtype='forecast'):
+    for tank in Tank.all_tanks:
+        tank.set_inflow_forecast(forecast_rain)  # happens once a forecast is made
+    for i in range(cfg.sim_len):
+        if sum(forecast_rain[int(i // (cfg.rain_dt / cfg.dt)):-1]) + Tank.get_tot_storage() == 0:
+            break  # this should break forecast run only!
+        for tank in Tank.all_tanks:
+            current_rain_volume = tank.inflow_forecast[int(i // (cfg.rain_dt / cfg.dt))] * (cfg.dt / cfg.rain_dt)
+            tank.tank_fill(current_rain_volume, i)
+            tank.rw_use(tank.daily_demands[i % tank.daily_demands.shape[0]], i)
+        if i < 1 or (Pipe.get_tot_Q(i - 1) + Tank.get_tot_overflow(i)) < 1e-4:
+            continue
+        for node in Node.all_nodes:
+            node.handle_flow(i)
+            for pipe in node.giving_to:
+                pipe.calc_q_outlet(i)
+
+
 runtime = Timer()
 runtime.start()
 demands = np.array([])
@@ -45,29 +64,16 @@ node21 = Node('node21', [outlet4], [pipe5])
 node2 = Node('node2', [pipe4, pipe5], [pipe6])
 outfall = Node('outfall', [pipe6])
 
-tot_Q = np.zeros(cfg.sim_len, dtype=np.longfloat)
 # Create forecast - currently real rain only!
 forecast_rain = funx.set_rain_input('09-10.csv', cfg.rain_dt, cfg.sim_len)
 for tank in Tank.all_tanks:
-    tank.set_inflow_forecast(forecast_rain)  # happens once a forecast is made
     tank.set_daily_demands(demand_PD)  # happens only once
 
 # starting main sim loop
-
-for i in range(cfg.sim_len):
-    if sum(forecast_rain[int(i // (cfg.rain_dt / cfg.dt)):-1]) + Tank.get_tot_storage() == 0:
-        break  # this should break forecast run only!
-    for tank in Tank.all_tanks:
-        current_rain_volume = tank.inflow_forecast[int(i // (cfg.rain_dt / cfg.dt))] * (cfg.dt / cfg.rain_dt)
-        tank.tank_fill(current_rain_volume, i)
-        tank.rw_use(tank.daily_demands[i % tank.daily_demands.shape[0]], i)
-    if i < 1 or (Pipe.get_tot_Q(i - 1) + Tank.get_tot_overflow(i)) < 1e-4:
-        continue
-    for node in Node.all_nodes:
-        node.handle_flow(i)
-        for pipe in node.giving_to:
-            pipe.calc_q_outlet(i)
-mass_balance_err = 100 * (abs(integrate.simps(pipe6.outlet_Q * cfg.dt, cfg.t[:-1]) - Tank.get_cum_overflow())) / Tank.get_cum_overflow()
+run_model()
+mass_balance_err = 100 * (abs(integrate.simps(pipe6.outlet_Q * cfg.dt, cfg.t[:-1]) - Tank.get_cum_overflow()))\
+                   / Tank.get_cum_overflow()
 print(f"Mass Balance Error: {mass_balance_err:0.2f}%")
 runtime.stop()
 print('d')
+
