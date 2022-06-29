@@ -58,10 +58,10 @@ class Tank:
     def tot_outflow(self):
         pass
 
-    def set_rain_forecast(self, rain):
-        self.in_volume_forecast = rain * self.roof / 1000
+    def set_inflow_forecast(self, rain):
+        self.inflow_forecast = rain * self.roof / 1000
 
-    def set_demands(self, demand_pattern):
+    def set_daily_demands(self, demand_pattern):
         self.daily_demands = demand_pattern * self.dwellers / 1000
 
     def tank_fill(self, cur_rain_volume, timestep):
