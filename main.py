@@ -34,10 +34,10 @@ for demand in cfg.demands_3h:
     demands = np.append(demands, np.ones(int(cfg.demand_dt / cfg.dt)) * (demand * (cfg.dt / cfg.demand_dt)))
 demand_PD = demands * cfg.PD / 100
 
-tank1 = Tank('tank1', 30, 0, 9000, 180)
-tank2 = Tank('tank2', 35, 0, 10000, 190)
-tank3 = Tank('tank3', 25, 0, 8500, 150)
-tank4 = Tank('tank4', 50, 0, 14000, 650)
+tank1 = Tank('tank1', 30, 10, 9000, 180)
+tank2 = Tank('tank2', 35, 10, 10000, 190)
+tank3 = Tank('tank3', 25, 20, 8500, 150)
+tank4 = Tank('tank4', 50, 30, 14000, 650)
 
 outlet1 = Pipe('outlet1', 250, 0.4, 0.02)
 outlet2 = Pipe('outlet2', 330, 0.4, 0.015)

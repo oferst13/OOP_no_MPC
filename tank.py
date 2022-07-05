@@ -18,14 +18,16 @@ class Tank:
         self.dwellers = dwellers
         self.tank_size = self.n_tanks * self.standard_size
         self.cur_storage = init_storage
-        self.cur_sim_storage = init_storage
         self.orifice_A = ((self.standard_orifice / 2) ** 2) * np.pi
         self.footprint = ((self.standard_diameter / 2) ** 2) * np.pi
-        self.overflows = np.zeros(cfg.sim_len, dtype=np.longfloat)
+        self.overflows = np.zeros(cfg.sim_len)
         self.releases = np.zeros(cfg.sim_len)
         self.rw_supply = np.zeros(cfg.sim_len)
+        self.all_storage = np.zeros(cfg.sim_len)
+        self.all_storage[0] = self.init_storage
+        self.all_storage_temp = copy.copy(self.all_storage)
         self.inflow_forecast = None
-        self.in_volume_actual = None
+        self.inflow_actual = None
         self.daily_demands = None  # currently with dt only
         Tank.all_tanks.append(self)
 

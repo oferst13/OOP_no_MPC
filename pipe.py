@@ -1,3 +1,5 @@
+import copy
+
 import numpy as np
 import cfg
 
@@ -12,15 +14,17 @@ class Pipe:
         self.slope = slope
         self.alpha = (0.501 / cfg.manning) * (diameter ** (1 / 6)) * (slope ** 0.5)
         self.inlet_Q = np.zeros(cfg.sim_len, dtype=np.longfloat)
+        self.inlet_Q_temp = copy.copy(self.inlet_Q)
         self.outlet_Q = np.zeros(cfg.sim_len, dtype=np.longfloat)
+        self.outlet_Q_temp = copy.copy(self.outlet_Q)
         Pipe.all_pipes.append(self)
 
     def calc_q_outlet(self, timestep):
-        inlet_A = (self.inlet_Q[timestep] / self.alpha) ** (1 / cfg.beta)
-        last_outlet_A = (self.outlet_Q[timestep - 1] / self.alpha) ** (1 / cfg.beta)
+        inlet_A = (self.inlet_Q_temp[timestep] / self.alpha) ** (1 / cfg.beta)
+        last_outlet_A = (self.outlet_Q_temp[timestep - 1] / self.alpha) ** (1 / cfg.beta)
         constant = self.alpha * cfg.beta * (cfg.dt / self.length)
         out_A = last_outlet_A - constant * (((inlet_A + last_outlet_A) / 2) ** (cfg.beta - 1)) * (last_outlet_A - inlet_A)
-        self.outlet_Q[timestep] = self.alpha * (out_A ** cfg.beta)
+        self.outlet_Q_temp[timestep] = self.alpha * (out_A ** cfg.beta)
 
     @classmethod
     def get_tot_Q(cls, timestep):
