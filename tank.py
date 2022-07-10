@@ -25,7 +25,6 @@ class Tank:
         self.rw_supply = np.zeros(cfg.sim_len)
         self.all_storage = np.zeros(cfg.sim_len)
         self.all_storage[0] = self.init_storage
-        self.all_storage_temp = copy.copy(self.all_storage)
         self.inflow_forecast = None
         self.inflow_actual = None
         self.daily_demands = None  # currently with dt only
@@ -52,9 +51,12 @@ class Tank:
             cum_overflow += tank.overflows
         return np.sum(cum_overflow)
 
-    def get_overflow(self):
-        pass
-
+    @classmethod
+    def get_last_overflow(cls):
+        last_overflow_list = []
+        for tank in cls.all_tanks:
+            last_overflow_list.append(np.max(np.nonzero(tank.overflows)))
+        return max(last_overflow_list)
     def set_release(self, release_deg):
         release_Q = self.n_tanks * self.orifice_A * cfg.Cd\
                     * np.sqrt(2 * 9.81 * (self.cur_storage / (self.n_tanks * self.footprint))) * 0.1 * release_deg

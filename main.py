@@ -19,7 +19,7 @@ def run_model(runtype='forecast'):
             current_rain_volume = tank.inflow_forecast[int(i // (cfg.rain_dt / cfg.dt))] * (cfg.dt / cfg.rain_dt)
             tank.tank_fill(current_rain_volume, i)
             tank.rw_use(tank.daily_demands[i % tank.daily_demands.shape[0]], i)
-        if i < 1 or (Pipe.get_tot_Q(i - 1) + Tank.get_tot_overflow(i)) < 1e-4:
+        if i < 1 or (Pipe.get_tot_Q(i - 1) + Tank.get_tot_overflow(i)) < 1e-3:
             continue
         for node in Node.all_nodes:
             node.handle_flow(i)
@@ -34,10 +34,10 @@ for demand in cfg.demands_3h:
     demands = np.append(demands, np.ones(int(cfg.demand_dt / cfg.dt)) * (demand * (cfg.dt / cfg.demand_dt)))
 demand_PD = demands * cfg.PD / 100
 
-tank1 = Tank('tank1', 30, 10, 9000, 180)
-tank2 = Tank('tank2', 35, 10, 10000, 190)
-tank3 = Tank('tank3', 25, 20, 8500, 150)
-tank4 = Tank('tank4', 50, 30, 14000, 650)
+tank1 = Tank('tank1', 30, 0, 9000, 180)
+tank2 = Tank('tank2', 35, 0, 10000, 190)
+tank3 = Tank('tank3', 25, 0, 8500, 150)
+tank4 = Tank('tank4', 50, 0, 14000, 650)
 
 outlet1 = Pipe('outlet1', 250, 0.4, 0.02)
 outlet2 = Pipe('outlet2', 330, 0.4, 0.015)
@@ -74,6 +74,13 @@ run_model()
 mass_balance_err = 100 * (abs(integrate.simps(pipe6.outlet_Q * cfg.dt, cfg.t[:-1]) - Tank.get_cum_overflow()))\
                    / Tank.get_cum_overflow()
 print(f"Mass Balance Error: {mass_balance_err:0.2f}%")
+zero_Q = outfall.get_zero_Q()
+last_overflow = Tank.get_last_overflow()
+obj_Q = integrate.simps(pipe6.outlet_Q[:zero_Q] , cfg.t[:zero_Q]) / (last_overflow)
+to_min = 0.0
+for i in range(last_overflow):
+    to_min += abs(pipe6.outlet_Q[i] - obj_Q)
 runtime.stop()
+
 print('d')
 
