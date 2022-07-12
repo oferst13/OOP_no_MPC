@@ -14,9 +14,8 @@ def run_model(runtype='forecast'):
         if sum(forecast_rain[int(i // (cfg.rain_dt / cfg.dt)):-1]) + Tank.get_tot_storage() == 0:
             break  # this should break forecast run only!
         for tank in Tank.all_tanks:
-            current_rain_volume = tank.inflow_forecast[int(i // (cfg.rain_dt / cfg.dt))] * (cfg.dt / cfg.rain_dt)
-            tank.tank_fill(current_rain_volume, i)
-            tank.rw_use(tank.daily_demands[i % tank.daily_demands.shape[0]], i)
+            tank.tank_fill(i)
+            tank.rw_use(i)
         if i < 1 or (Pipe.get_tot_Q(i - 1) + Tank.get_tot_overflow(i)) < 1e-3:
             continue
         for node in Node.all_nodes:

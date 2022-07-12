@@ -16,7 +16,7 @@ class Node:
         inflow: float = 0
         if self.tank_node:
             for tank in self.receiving_from:
-                inflow += (tank.overflows[timestep] + tank.releases[timestep]) / cfg.dt
+                inflow += (tank.overflows[timestep] + tank.release_volume[timestep]) / cfg.dt
         else:
             for pipe in self.receiving_from:
                 inflow += pipe.outlet_Q[timestep]
