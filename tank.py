@@ -69,7 +69,7 @@ class Tank:
                     * np.sqrt(2 * 9.81 * (self.cur_storage / (self.n_tanks * self.footprint))) * 0.1 * release_deg
         release_vol = release_Q * cfg.dt
 
-    def tot_outflow(self):
+    def reset_tank(self):
         pass
 
     def set_inflow_forecast(self, rain):
