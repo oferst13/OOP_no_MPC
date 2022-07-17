@@ -1,12 +1,18 @@
 import copy
 from scipy import integrate
-import funx
 from tank import Tank
 from pipe import Pipe
 from node import Node
 import cfg
 import numpy as np
 from timer import Timer
+
+
+def set_rain_input(rainfile, rain_dt, duration):
+    rain = np.zeros(int(duration / (rain_dt/cfg.dt)))
+    rain_input = np.genfromtxt(rainfile, delimiter=',')
+    rain[:len(rain_input)] = rain_input
+    return rain
 
 
 def run_model(runtype='forecast'):
@@ -70,7 +76,7 @@ node2 = Node('node2', [pipe4, pipe5], [pipe6])
 outfall = Node('outfall', [pipe6])
 
 # Create forecast - currently real rain only!
-forecast_rain = funx.set_rain_input('09-10.csv', cfg.rain_dt, cfg.sim_len)
+forecast_rain = set_rain_input('09-10.csv', cfg.rain_dt, cfg.sim_len)
 for tank in Tank.all_tanks:
     tank.set_daily_demands(demand_PD)  # happens only once
 

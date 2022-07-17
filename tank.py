@@ -21,18 +21,18 @@ class Tank:
             setattr(self, att, val)
 
         self.tank_size = self.n_tanks * self.standard_size
-        self.cur_storage = self.init_storage
+        self.cur_storage = None
         self.orifice_A = ((self.standard_orifice / 2) ** 2) * np.pi
         self.footprint = ((self.standard_diameter / 2) ** 2) * np.pi
-        self.overflows = np.zeros(cfg.sim_len)
-        self.releases = np.zeros(int(cfg.sim_len / (cfg.release_dt / cfg.dt)))
-        self.release_volume = np.zeros(cfg.sim_len)
-        self.rw_supply = np.zeros(cfg.sim_len)
-        self.all_storage = np.zeros(cfg.sim_len)
-        self.all_storage[0] = self.init_storage
+        self.overflows = None
+        self.releases = None
+        self.release_volume = None
+        self.rw_supply = None
+        self.all_storage = None
         self.inflow_forecast = None
         self.inflow_actual = None
         self.daily_demands = None  # currently with dt only
+        self.reset_tank()
         Tank.all_tanks.append(self)
 
     @classmethod
@@ -70,7 +70,13 @@ class Tank:
         release_vol = release_Q * cfg.dt
 
     def reset_tank(self):
-        pass
+        self.cur_storage = self.init_storage
+        self.overflows = np.zeros(cfg.sim_len)
+        self.releases = np.zeros(int(cfg.sim_len / (cfg.release_dt / cfg.dt)))
+        self.release_volume = np.zeros(cfg.sim_len)
+        self.rw_supply = np.zeros(cfg.sim_len)
+        self.all_storage = np.zeros(cfg.sim_len)
+        self.all_storage[0] = self.init_storage
 
     def set_inflow_forecast(self, rain):
         self.inflow_forecast = rain * self.roof / 1000
