@@ -68,6 +68,12 @@ class Tank:
         release_Q = self.n_tanks * self.orifice_A * cfg.Cd\
                     * np.sqrt(2 * 9.81 * (self.cur_storage / (self.n_tanks * self.footprint))) * 0.1 * release_deg
         release_vol = release_Q * cfg.dt
+        self.cur_storage -= release_vol
+        self.release_volume[timestep] = copy.copy(release_vol)
+        if self.cur_storage < 0:
+            self.cur_storage += release_vol
+            self.release_volume[timestep] = copy.copy(self.cur_storage)
+            self.cur_storage = 0
 
     def reset_tank(self):
         self.cur_storage = self.init_storage
@@ -103,3 +109,4 @@ class Tank:
             self.cur_storage += demand
             self.rw_supply[timestep] = copy.copy(self.cur_storage)
             self.cur_storage = 0
+        self.all_storage[timestep] = copy.copy(self.cur_storage)
