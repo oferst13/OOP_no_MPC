@@ -21,8 +21,9 @@ def run_model(runtype='forecast'):
             break  # this should break forecast run only!
         for tank in Tank.all_tanks:
             tank.tank_fill(i)
+            tank.set_release(i)
             tank.rw_use(i)
-        if i < 1 or (Pipe.get_tot_Q(i - 1) + Tank.get_tot_overflow(i)) < 1e-3:
+        if i < 1 or (Pipe.get_tot_Q(i - 1) + Tank.get_tot_outflow(i)) < 1e-3:
             continue
         for node in Node.all_nodes:
             node.handle_flow(i)
@@ -86,8 +87,9 @@ for tank in Tank.all_tanks:
 
 run_model()
 
-mass_balance_err = 100 * (abs(integrate.simps(pipe6.outlet_Q * cfg.dt, cfg.t[:-1]) - Tank.get_cum_overflow()))\
-                   / Tank.get_cum_overflow()
+mass_balance_err = 100 * (abs(integrate.simps(pipe6.outlet_Q * cfg.dt, cfg.t[:-1]) -
+                              (Tank.get_cum_overflow() + Tank.get_cum_release())))\
+                            / (Tank.get_cum_overflow() + Tank.get_cum_release())
 print(f"Mass Balance Error: {mass_balance_err:0.2f}%")
 zero_Q = outfall.get_zero_Q()
 last_overflow = Tank.get_last_overflow()

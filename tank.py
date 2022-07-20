@@ -43,11 +43,11 @@ class Tank:
         return tot_storage
 
     @classmethod
-    def get_tot_overflow(cls, timestep):
-        tot_overflow: float = 0
+    def get_tot_outflow(cls, timestep):
+        tot_outflow: float = 0
         for tank in cls.all_tanks:
-            tot_overflow += (tank.overflows[timestep] / cfg.dt)
-        return tot_overflow
+            tot_outflow += (tank.overflows[timestep] + tank.release_volume[timestep]) / cfg.dt
+        return tot_outflow
 
     @classmethod
     def get_cum_overflow(cls):
@@ -57,10 +57,18 @@ class Tank:
         return np.sum(cum_overflow)
 
     @classmethod
+    def get_cum_release(cls):
+        cum_release = np.zeros(cfg.sim_len)
+        for tank in cls.all_tanks:
+            cum_release += tank.release_volume
+        return np.sum(cum_release)
+
+    @classmethod
     def get_last_overflow(cls):
         last_overflow_list = []
         for tank in cls.all_tanks:
-            last_overflow_list.append(np.max(np.nonzero(tank.overflows)))
+            if np.sum(tank.overflows) > 0:
+                last_overflow_list.append(np.max(np.nonzero(tank.overflows)))
         return max(last_overflow_list)
 
     def set_release(self, timestep):
@@ -70,10 +78,10 @@ class Tank:
         release_vol = release_Q * cfg.dt
         self.cur_storage -= release_vol
         self.release_volume[timestep] = copy.copy(release_vol)
-        if self.cur_storage < 0:
+        if self.cur_storage < 0.0:
             self.cur_storage += release_vol
             self.release_volume[timestep] = copy.copy(self.cur_storage)
-            self.cur_storage = 0
+            self.cur_storage = 0.0
 
     def reset_tank(self):
         self.cur_storage = self.init_storage
