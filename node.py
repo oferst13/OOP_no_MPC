@@ -1,5 +1,5 @@
 import copy
-
+from scipy import integrate
 import numpy as np
 import cfg
 
@@ -36,3 +36,9 @@ class Node:
         for pipe in self.receiving_from:
             max_Q += np.max(pipe.outlet_Q)
         return max_Q
+
+    def get_cum_volume(self):
+        in_pipe = self.receiving_from[0]
+        zero_Q = self.get_zero_Q()
+        cum_volume = integrate.simps(in_pipe.outlet_Q[:zero_Q], cfg.t[:zero_Q])
+        return cum_volume

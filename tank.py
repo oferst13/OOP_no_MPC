@@ -64,6 +64,10 @@ class Tank:
         return np.sum(cum_release)
 
     @classmethod
+    def get_cum_outflow(cls):
+        return cls.get_cum_release() + cls.get_cum_overflow()
+
+    @classmethod
     def get_last_overflow(cls):
         last_overflow_list = []
         for tank in cls.all_tanks:

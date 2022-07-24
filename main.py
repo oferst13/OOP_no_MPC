@@ -5,7 +5,23 @@ from pipe import Pipe
 from node import Node
 import cfg
 import numpy as np
+import math
 from timer import Timer
+
+
+class Scenario:
+    def __init__(self, last_outflow, max_flow):
+        self.last_outflow = last_outflow
+        self.max_flow = max_flow
+        self.release_hour = math.ceil(Tank.get_last_overflow() * (cfg.dt / 3600))
+        self.obj_Q = None
+        self.fitness = None
+
+    def calc_obj_Q(self):
+        self.obj_Q = outfall.get_cum_volume() / Tank.get_last_overflow()
+
+    def calc_fitness(self):
+        pass
 
 
 def set_rain_input(rainfile, rain_dt, duration):
@@ -13,6 +29,13 @@ def set_rain_input(rainfile, rain_dt, duration):
     rain_input = np.genfromtxt(rainfile, delimiter=',')
     rain[:len(rain_input)] = rain_input
     return rain
+
+
+def calc_mass_balance():
+    mass_balance = 100 * (abs(integrate.simps(pipe6.outlet_Q * cfg.dt, cfg.t[:-1]) -
+                              (Tank.get_cum_outflow())))\
+                            / (Tank.get_cum_outflow())
+    return mass_balance
 
 
 def run_model(runtype='forecast'):
@@ -85,11 +108,11 @@ for tank in Tank.all_tanks:
 for tank in Tank.all_tanks:
     tank.set_inflow_forecast(forecast_rain)  # happens once a forecast is made
 
+
 run_model()
 
-mass_balance_err = 100 * (abs(integrate.simps(pipe6.outlet_Q * cfg.dt, cfg.t[:-1]) -
-                              (Tank.get_cum_overflow() + Tank.get_cum_release())))\
-                            / (Tank.get_cum_overflow() + Tank.get_cum_release())
+baseline = Scenario(Tank.get_last_overflow(), outfall.get_max_Q())
+mass_balance_err = calc_mass_balance()
 print(f"Mass Balance Error: {mass_balance_err:0.2f}%")
 zero_Q = outfall.get_zero_Q()
 last_overflow = Tank.get_last_overflow()
