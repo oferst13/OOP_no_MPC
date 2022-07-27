@@ -1,4 +1,3 @@
-import copy
 from scipy import integrate
 from tank import Tank
 from pipe import Pipe
@@ -18,10 +17,13 @@ class Scenario:
         self.fitness = None
 
     def calc_obj_Q(self):
-        self.obj_Q = outfall.get_cum_volume() / Tank.get_last_overflow()
+        self.obj_Q = outfall.get_outflow_volume() / Tank.get_last_overflow()
 
     def calc_fitness(self):
-        pass
+        to_min: float = 0
+        for i in range(self.last_outflow):
+            to_min += abs(outfall.get_flow(i) - self.obj_Q)
+        self.fitness = to_min
 
 
 def set_rain_input(rainfile, rain_dt, duration):
@@ -32,13 +34,11 @@ def set_rain_input(rainfile, rain_dt, duration):
 
 
 def calc_mass_balance():
-    mass_balance = 100 * (abs(integrate.simps(pipe6.outlet_Q * cfg.dt, cfg.t[:-1]) -
-                              (Tank.get_cum_outflow())))\
-                            / (Tank.get_cum_outflow())
+    mass_balance = 100 * (abs(outfall.get_outflow_volume() - Tank.get_cum_outflow())) / (Tank.get_cum_outflow())
     return mass_balance
 
 
-def run_model(runtype='forecast'):
+def run_model():
     for i in range(cfg.sim_len):
         if sum(forecast_rain[int(i // (cfg.rain_dt / cfg.dt)):-1]) + Tank.get_tot_storage() == 0:
             break  # this should break forecast run only!
@@ -116,10 +116,10 @@ mass_balance_err = calc_mass_balance()
 print(f"Mass Balance Error: {mass_balance_err:0.2f}%")
 zero_Q = outfall.get_zero_Q()
 last_overflow = Tank.get_last_overflow()
-obj_Q = integrate.simps(pipe6.outlet_Q[:zero_Q] , cfg.t[:zero_Q]) / (last_overflow)
-to_min = 0.0
-for i in range(last_overflow):
-    to_min += abs(pipe6.outlet_Q[i] - obj_Q)
+obj_Q = integrate.simps(pipe6.outlet_Q[:zero_Q], cfg.t[:zero_Q]) / (last_overflow)
+baseline.calc_obj_Q()
+baseline.calc_fitness()
+
 runtime.stop()
 
 print('d')

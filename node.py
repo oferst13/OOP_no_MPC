@@ -37,8 +37,15 @@ class Node:
             max_Q += np.max(pipe.outlet_Q)
         return max_Q
 
-    def get_cum_volume(self):
-        in_pipe = self.receiving_from[0]
+    def get_outflow_volume(self):
         zero_Q = self.get_zero_Q()
-        cum_volume = integrate.simps(in_pipe.outlet_Q[:zero_Q], cfg.t[:zero_Q])
-        return cum_volume
+        tot_volume = 0.0
+        for pipe in self.receiving_from:
+            tot_volume += integrate.simps(pipe.outlet_Q[:zero_Q], cfg.t[:zero_Q]) * cfg.dt
+        return tot_volume
+
+    def get_flow(self, timestep):
+        inflow: float = 0
+        for pipe in self.receiving_from:
+            inflow += pipe.outlet_Q[timestep]
+        return inflow
