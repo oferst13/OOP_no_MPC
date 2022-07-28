@@ -44,7 +44,7 @@ def run_model():
             break  # this should break forecast run only!
         for tank in Tank.all_tanks:
             tank.tank_fill(i)
-            tank.set_release(i)
+            tank.calc_release(i)
             tank.rw_use(i)
         if i < 1 or (Pipe.get_tot_Q(i - 1) + Tank.get_tot_outflow(i)) < 1e-3:
             continue
@@ -52,6 +52,19 @@ def run_model():
             node.handle_flow(i)
             for pipe in node.giving_to:
                 pipe.calc_q_outlet(i)
+
+
+def fitness_func(release_vector, idx):
+    for tank in Tank.all_tanks:
+        tank.reset_tank()
+    for pipe in Pipe.all_pipes:
+        pipe.reset_pipe()
+    release_array = np.reshape(release_vector, (len(Tank.all_tanks), baseline.release_hour))
+    for num, tank in enumerate(Tank.all_tanks):
+        tank.set_releases(release_array[num, :])
+    run_model()
+    print(f"Mass Balance Error: {calc_mass_balance():0.2f}%")
+
 
 
 runtime = Timer()

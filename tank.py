@@ -75,7 +75,7 @@ class Tank:
                 last_overflow_list.append(np.max(np.nonzero(tank.overflows)))
         return max(last_overflow_list)
 
-    def set_release(self, timestep):
+    def calc_release(self, timestep):
         release_deg = self.releases[timestep // int(cfg.release_dt / cfg.dt)]
         release_Q = self.n_tanks * self.orifice_A * cfg.Cd\
                     * np.sqrt(2 * 9.81 * (self.cur_storage / (self.n_tanks * self.footprint))) * 0.1 * release_deg
@@ -110,8 +110,8 @@ class Tank:
             self.cur_storage = self.tank_size
             self.overflows[timestep] = overflow
 
-    def release(self, timestep):
-        pass
+    def set_releases(self, release_vec):
+        self.releases = release_vec
 
     def rw_use(self, timestep):
         demand = self.daily_demands[timestep % self.daily_demands.shape[0]]
