@@ -6,24 +6,34 @@ import cfg
 import numpy as np
 import math
 from timer import Timer
+import pygad
+import GA_params as GA
 
 
 class Scenario:
-    def __init__(self, last_outflow, max_flow):
+    def __init__(self, last_outflow, max_flow, last_Q):
         self.last_outflow = last_outflow
         self.max_flow = max_flow
+        self.last_Q = last_Q
         self.release_hour = math.ceil(Tank.get_last_overflow() * (cfg.dt / 3600))
         self.obj_Q = None
         self.fitness = None
 
     def calc_obj_Q(self):
-        self.obj_Q = outfall.get_outflow_volume() / Tank.get_last_overflow()
+        self.obj_Q = outfall.get_outflow_volume() / (Tank.get_last_overflow() * cfg.dt)
 
-    def calc_fitness(self):
+    def set_fitness(self):
         to_min: float = 0
-        for i in range(self.last_outflow):
+        for i in range(self.last_Q):
             to_min += abs(outfall.get_flow(i) - self.obj_Q)
         self.fitness = to_min
+
+
+def calc_fitness():
+    to_min: float = 0
+    for i in range(outfall.get_zero_Q()):
+        to_min += abs(outfall.get_flow(i) - baseline.obj_Q)
+    return to_min
 
 
 def set_rain_input(rainfile, rain_dt, duration):
@@ -64,7 +74,8 @@ def fitness_func(release_vector, idx):
         tank.set_releases(release_array[num, :])
     run_model()
     print(f"Mass Balance Error: {calc_mass_balance():0.2f}%")
-
+    fitness = 1.0 / calc_fitness()
+    return fitness
 
 
 runtime = Timer()
@@ -124,16 +135,17 @@ for tank in Tank.all_tanks:
 
 run_model()
 
-baseline = Scenario(Tank.get_last_overflow(), outfall.get_max_Q())
+baseline = Scenario(Tank.get_last_overflow(), outfall.get_max_Q(), outfall.get_zero_Q())
 mass_balance_err = calc_mass_balance()
 print(f"Mass Balance Error: {mass_balance_err:0.2f}%")
 zero_Q = outfall.get_zero_Q()
 last_overflow = Tank.get_last_overflow()
 obj_Q = integrate.simps(pipe6.outlet_Q[:zero_Q], cfg.t[:zero_Q]) / (last_overflow)
 baseline.calc_obj_Q()
-baseline.calc_fitness()
+baseline.set_fitness()
 
+
+init_pop = GA.pop_init(baseline.release_hour, len(Tank.all_tanks))
 runtime.stop()
-
 print('d')
 

@@ -10,13 +10,13 @@ class Tank:
     standard_diameter = 2.8
     all_tanks = []
 
-    #def __init__(self, name, n_tanks, init_storage, roof, dwellers):
+    # def __init__(self, name, n_tanks, init_storage, roof, dwellers):
     def __init__(self, dictionary):
-        #self.name = name
-        #self.n_tanks = n_tanks
-        #self.init_storage = init_storage
-        #self.roof = roof
-        #self.dwellers = dwellers
+        # self.name = name
+        # self.n_tanks = n_tanks
+        # self.init_storage = init_storage
+        # self.roof = roof
+        # self.dwellers = dwellers
         for att, val in dictionary.items():
             setattr(self, att, val)
 
@@ -73,11 +73,14 @@ class Tank:
         for tank in cls.all_tanks:
             if np.sum(tank.overflows) > 0:
                 last_overflow_list.append(np.max(np.nonzero(tank.overflows)))
-        return max(last_overflow_list)
+        if last_overflow_list:
+            return max(last_overflow_list)
+        else:
+            return 0
 
     def calc_release(self, timestep):
         release_deg = self.releases[timestep // int(cfg.release_dt / cfg.dt)]
-        release_Q = self.n_tanks * self.orifice_A * cfg.Cd\
+        release_Q = self.n_tanks * self.orifice_A * cfg.Cd \
                     * np.sqrt(2 * 9.81 * (self.cur_storage / (self.n_tanks * self.footprint))) * 0.1 * release_deg
         release_vol = release_Q * cfg.dt
         self.cur_storage -= release_vol
