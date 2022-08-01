@@ -78,8 +78,11 @@ class Tank:
         else:
             return 0
 
-    def calc_release(self, timestep):
-        release_deg = self.releases[timestep // int(cfg.release_dt / cfg.dt)]
+    def calc_release(self, timestep, last_overflow):
+        if timestep <= last_overflow:
+            release_deg = self.releases[timestep // int(cfg.release_dt / cfg.dt)]
+        else:
+            release_deg = 0.0
         release_Q = self.n_tanks * self.orifice_A * cfg.Cd \
                     * np.sqrt(2 * 9.81 * (self.cur_storage / (self.n_tanks * self.footprint))) * 0.1 * release_deg
         release_vol = release_Q * cfg.dt

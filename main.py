@@ -7,15 +7,15 @@ import numpy as np
 import math
 from timer import Timer
 import pygad
-import GA_params as GA
+import GA_params as ga
 
 
 class Scenario:
-    def __init__(self, last_outflow, max_flow, last_Q):
-        self.last_outflow = last_outflow
-        self.max_flow = max_flow
-        self.last_Q = last_Q
-        self.release_hour = math.ceil(Tank.get_last_overflow() * (cfg.dt / 3600))
+    def __init__(self):
+        self.last_outflow = 0
+        self.max_flow = None
+        self.last_Q = None
+        self.release_hour = None
         self.obj_Q = None
         self.fitness = None
 
@@ -27,6 +27,18 @@ class Scenario:
         for i in range(self.last_Q):
             to_min += abs(outfall.get_flow(i) - self.obj_Q)
         self.fitness = to_min
+
+    def set_release_hour(self):
+        self.release_hour = math.ceil(Tank.get_last_overflow() * (cfg.dt / 3600))
+
+    def set_last_outflow(self):
+        self.last_outflow = Tank.get_last_overflow()
+
+    def set_max_flow(self):
+        self.max_flow = outfall.get_max_Q()
+
+    def set_last_Q(self):
+        self.last_Q = outfall.get_zero_Q()
 
 
 def calc_fitness():
@@ -54,7 +66,7 @@ def run_model():
             break  # this should break forecast run only!
         for tank in Tank.all_tanks:
             tank.tank_fill(i)
-            tank.calc_release(i)
+            tank.calc_release(i, baseline.last_outflow)
             tank.rw_use(i)
         if i < 1 or (Pipe.get_tot_Q(i - 1) + Tank.get_tot_outflow(i)) < 1e-3:
             continue
@@ -75,7 +87,12 @@ def fitness_func(release_vector, idx):
     run_model()
     print(f"Mass Balance Error: {calc_mass_balance():0.2f}%")
     fitness = 1.0 / calc_fitness()
-    return fitness
+    return float(fitness)
+
+
+def callback_gen(ga_instance):
+    print("Generation : ", ga_instance.generations_completed)
+    print("Fitness of the best solution :", ga_instance.best_solution()[1])
 
 
 runtime = Timer()
@@ -132,20 +149,42 @@ for tank in Tank.all_tanks:
 for tank in Tank.all_tanks:
     tank.set_inflow_forecast(forecast_rain)  # happens once a forecast is made
 
+baseline = Scenario()
+
 
 run_model()
 
-baseline = Scenario(Tank.get_last_overflow(), outfall.get_max_Q(), outfall.get_zero_Q())
+baseline.set_last_outflow()
+baseline.set_max_flow()
+baseline.set_last_Q()
+baseline.set_release_hour()
+baseline.calc_obj_Q()
+baseline.set_fitness()
 mass_balance_err = calc_mass_balance()
 print(f"Mass Balance Error: {mass_balance_err:0.2f}%")
 zero_Q = outfall.get_zero_Q()
 last_overflow = Tank.get_last_overflow()
 obj_Q = integrate.simps(pipe6.outlet_Q[:zero_Q], cfg.t[:zero_Q]) / (last_overflow)
-baseline.calc_obj_Q()
-baseline.set_fitness()
 
 
-init_pop = GA.pop_init(baseline.release_hour, len(Tank.all_tanks))
+optim = input('optimize? Y/N')
+if optim == 'Y':
+    ga_instance = pygad.GA(num_generations=ga.num_generations,
+                           initial_population=ga.pop_init(baseline.release_hour, len(Tank.all_tanks)),
+                           num_parents_mating=ga.set_parent_num(baseline.release_hour, len(Tank.all_tanks)),
+                           gene_space=ga.gene_space,
+                           parent_selection_type=ga.parent_selection,
+                           crossover_type=ga.crossover_type,
+                           crossover_probability=ga.crossover_prob,
+                           mutation_type=ga.mutation_type,
+                           mutation_probability=ga.mutation_prob,
+                           mutation_by_replacement=ga.mutation_by_replacement,
+                           stop_criteria=ga.stop_criteria,
+                           fitness_func=fitness_func,
+                           save_best_solutions=True,
+                           callback_generation=callback_gen)
+    ga_instance.run()
+init_pop = ga.pop_init(baseline.release_hour, len(Tank.all_tanks))
 runtime.stop()
 print('d')
 

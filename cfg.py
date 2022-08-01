@@ -18,7 +18,7 @@ if collective_hor:
     prediction_hor = copy.copy(forecast_hor)
     control_hor = copy.copy(forecast_hor)
 
-Cd = 0.6
+Cd = 0.5
 # Deterministic demands - Change if necessary!
 demand_dt = 3 * 60 * 60
 demands_3h = np.array([5, 3, 20, 15, 12, 15, 18, 12])
