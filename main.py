@@ -90,22 +90,22 @@ def fitness_func(release_vector, idx):
     return float(fitness)
 
 
-def callback_gen(ga_instance):
+def on_gen(ga_instance):
     print("Generation : ", ga_instance.generations_completed)
     print("Fitness of the best solution :", ga_instance.best_solution()[1])
 
 
-runtime = Timer()
-runtime.start()
+#runtime = Timer()
+#runtime.start()
 demands = np.array([])
 for demand in cfg.demands_3h:
     demands = np.append(demands, np.ones(int(cfg.demand_dt / cfg.dt)) * (demand * (cfg.dt / cfg.demand_dt)))
 demand_PD = demands * cfg.PD / 100
 
-tank1_dict = {'name': 'tank1', 'n_tanks': 30, 'init_storage': 0, 'roof': 9000, 'dwellers': 180}
-tank2_dict = {'name': 'tank2', 'n_tanks': 35, 'init_storage': 0, 'roof': 10000, 'dwellers': 180}
-tank3_dict = {'name': 'tank3', 'n_tanks': 25, 'init_storage': 0, 'roof': 8500, 'dwellers': 180}
-tank4_dict = {'name': 'tank4', 'n_tanks': 50, 'init_storage': 0, 'roof': 14000, 'dwellers': 180}
+tank1_dict = {'name': 'tank1', 'n_tanks': 30, 'init_storage': 300, 'roof': 9000, 'dwellers': 180}
+tank2_dict = {'name': 'tank2', 'n_tanks': 35, 'init_storage': 350, 'roof': 10000, 'dwellers': 180}
+tank3_dict = {'name': 'tank3', 'n_tanks': 25, 'init_storage': 250, 'roof': 8500, 'dwellers': 180}
+tank4_dict = {'name': 'tank4', 'n_tanks': 50, 'init_storage': 500, 'roof': 14000, 'dwellers': 180}
 #tank1 = Tank('tank1', 30, 0, 9000, 180)
 #tank2 = Tank('tank2', 35, 0, 10000, 190)
 #tank3 = Tank('tank3', 25, 0, 8500, 150)
@@ -181,10 +181,9 @@ if optim == 'Y':
                            mutation_by_replacement=ga.mutation_by_replacement,
                            stop_criteria=ga.stop_criteria,
                            fitness_func=fitness_func,
-                           save_best_solutions=True,
-                           callback_generation=callback_gen)
+                           on_generation=on_gen)
     ga_instance.run()
 init_pop = ga.pop_init(baseline.release_hour, len(Tank.all_tanks))
-runtime.stop()
+#runtime.stop()
 print('d')
 

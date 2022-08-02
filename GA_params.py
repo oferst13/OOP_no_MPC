@@ -5,16 +5,16 @@ num_generations = 250
 gene_space = [0.25, 0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 parent_selection = "rank"
 crossover_type = "uniform"
-crossover_prob = 0.5
-mutation_prob = [0.2, 0.1]
+crossover_prob = 0.3
+mutation_prob = 0.05
 mutation_by_replacement = True
-mutation_type = "adaptive"
+mutation_type = "random"
 stop_criteria = "saturate_80"
 
 
 def pop_init(release_hr, n_tanks):
     num_genes = release_hr * n_tanks
-    num_sols = num_genes * 2
+    num_sols = math.ceil(num_genes * 1.5)
     sol_zero = np.zeros(num_genes)
     sol_one = np.ones(num_genes) * gene_space[0]
     sol_two = np.ones(num_genes) * gene_space[1]
@@ -29,5 +29,5 @@ def pop_init(release_hr, n_tanks):
 
 
 def set_parent_num(release_hr, n_tanks):
-    num_parents = math.ceil(release_hr * n_tanks * 2 * 0.1)
+    num_parents = math.ceil(release_hr * n_tanks * 2 * 0.06)
     return num_parents
