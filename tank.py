@@ -5,9 +5,9 @@ import cfg
 
 
 class Tank:
-    standard_size = 20
+    standard_size = 10
     standard_orifice = 0.05
-    standard_diameter = 2.8
+    standard_diameter = 2.55
     all_tanks = []
 
     # def __init__(self, name, n_tanks, init_storage, roof, dwellers):

@@ -102,10 +102,10 @@ for demand in cfg.demands_3h:
     demands = np.append(demands, np.ones(int(cfg.demand_dt / cfg.dt)) * (demand * (cfg.dt / cfg.demand_dt)))
 demand_PD = demands * cfg.PD / 100
 
-tank1_dict = {'name': 'tank1', 'n_tanks': 30, 'init_storage': 300, 'roof': 9000, 'dwellers': 180}
-tank2_dict = {'name': 'tank2', 'n_tanks': 35, 'init_storage': 350, 'roof': 10000, 'dwellers': 180}
-tank3_dict = {'name': 'tank3', 'n_tanks': 25, 'init_storage': 250, 'roof': 8500, 'dwellers': 180}
-tank4_dict = {'name': 'tank4', 'n_tanks': 50, 'init_storage': 500, 'roof': 14000, 'dwellers': 180}
+tank1_dict = {'name': 'tank1', 'n_tanks': 30, 'init_storage': 0, 'roof': 9000, 'dwellers': 180}
+tank2_dict = {'name': 'tank2', 'n_tanks': 35, 'init_storage': 0, 'roof': 10000, 'dwellers': 180}
+tank3_dict = {'name': 'tank3', 'n_tanks': 25, 'init_storage': 0, 'roof': 8500, 'dwellers': 180}
+tank4_dict = {'name': 'tank4', 'n_tanks': 50, 'init_storage': 0, 'roof': 14000, 'dwellers': 180}
 #tank1 = Tank('tank1', 30, 0, 9000, 180)
 #tank2 = Tank('tank2', 35, 0, 10000, 190)
 #tank3 = Tank('tank3', 25, 0, 8500, 150)
