@@ -47,6 +47,12 @@ def calc_fitness():
         to_min += abs(outfall.get_flow(i) - baseline.obj_Q)
     return to_min
 
+def set_demands_per_dt():
+    demands = np.array([])
+    for demand in cfg.demands_3h:
+        demands = np.append(demands, np.ones(int(cfg.demand_dt / cfg.dt)) * (demand * (cfg.dt / cfg.demand_dt)))
+    demand_PD = demands * cfg.PD / 100
+    return demand_PD
 
 def set_rain_input(rainfile, rain_dt, duration):
     rain = np.zeros(int(duration / (rain_dt/cfg.dt)))
@@ -95,21 +101,19 @@ def on_gen(ga_instance):
     print("Fitness of the best solution :", ga_instance.best_solution()[1])
 
 
-#runtime = Timer()
-#runtime.start()
-demands = np.array([])
-for demand in cfg.demands_3h:
-    demands = np.append(demands, np.ones(int(cfg.demand_dt / cfg.dt)) * (demand * (cfg.dt / cfg.demand_dt)))
-demand_PD = demands * cfg.PD / 100
+# runtime = Timer()
+# runtime.start()
+
+num_forecast_files = 26
 
 tank1_dict = {'name': 'tank1', 'n_tanks': 30, 'init_storage': 0, 'roof': 9000, 'dwellers': 180}
 tank2_dict = {'name': 'tank2', 'n_tanks': 35, 'init_storage': 0, 'roof': 10000, 'dwellers': 180}
 tank3_dict = {'name': 'tank3', 'n_tanks': 25, 'init_storage': 0, 'roof': 8500, 'dwellers': 180}
 tank4_dict = {'name': 'tank4', 'n_tanks': 50, 'init_storage': 0, 'roof': 14000, 'dwellers': 180}
-#tank1 = Tank('tank1', 30, 0, 9000, 180)
-#tank2 = Tank('tank2', 35, 0, 10000, 190)
-#tank3 = Tank('tank3', 25, 0, 8500, 150)
-#tank4 = Tank('tank4', 50, 0, 14000, 650)
+# tank1 = Tank('tank1', 30, 0, 9000, 180)
+# tank2 = Tank('tank2', 35, 0, 10000, 190)
+# tank3 = Tank('tank3', 25, 0, 8500, 150)
+# tank4 = Tank('tank4', 50, 0, 14000, 650)
 tank1 = Tank(tank1_dict)
 tank2 = Tank(tank2_dict)
 tank3 = Tank(tank3_dict)
@@ -142,8 +146,9 @@ outfall = Node('outfall', [pipe6])
 
 # Create forecast - currently real rain only!
 forecast_rain = set_rain_input('09-10.csv', cfg.rain_dt, cfg.sim_len)
+demands_PD = set_demands_per_dt()
 for tank in Tank.all_tanks:
-    tank.set_daily_demands(demand_PD)  # happens only once
+    tank.set_daily_demands(demands_PD)  # happens only once
 
 # starting main sim loop
 for tank in Tank.all_tanks:
