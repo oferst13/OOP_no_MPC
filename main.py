@@ -47,6 +47,7 @@ def calc_fitness():
         to_min += abs(outfall.get_flow(i) - baseline.obj_Q)
     return to_min
 
+
 def set_demands_per_dt():
     demands = np.array([])
     for demand in cfg.demands_3h:
@@ -54,11 +55,19 @@ def set_demands_per_dt():
     demand_PD = demands * cfg.PD / 100
     return demand_PD
 
+
 def set_rain_input(rainfile, rain_dt, duration):
     rain = np.zeros(int(duration / (rain_dt/cfg.dt)))
     rain_input = np.genfromtxt(rainfile, delimiter=',')
     rain[:len(rain_input)] = rain_input
     return rain
+
+
+def set_rainfile_name(prefix, idx):
+    idx_str = str(idx)
+    cur_filename = '-'.join([prefix, idx_str])
+    cur_filename = '.'.join([cur_filename, 'csv'])
+    return cur_filename
 
 
 def calc_mass_balance():
@@ -146,16 +155,15 @@ outfall = Node('outfall', [pipe6])
 
 # Create forecast - currently real rain only!
 forecast_rain = set_rain_input('09-10.csv', cfg.rain_dt, cfg.sim_len)
+for tank in Tank.all_tanks:
+    tank.set_inflow_forecast(forecast_rain)  # happens once a forecast is made
+
 demands_PD = set_demands_per_dt()
 for tank in Tank.all_tanks:
     tank.set_daily_demands(demands_PD)  # happens only once
 
 # starting main sim loop
-for tank in Tank.all_tanks:
-    tank.set_inflow_forecast(forecast_rain)  # happens once a forecast is made
-
 baseline = Scenario()
-
 
 run_model()
 
