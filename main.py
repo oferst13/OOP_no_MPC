@@ -78,7 +78,7 @@ def calc_mass_balance():
 def run_model():
     for i in range(cfg.sim_len):
         if sum(forecast_rain[int(i // (cfg.rain_dt / cfg.dt)):-1]) + Tank.get_tot_storage() == 0:
-            break  # this should break forecast run only!
+            break  # this should break forecast run only!!
         for tank in Tank.all_tanks:
             tank.tank_fill(i)
             tank.calc_release(i, baseline.last_outflow)
