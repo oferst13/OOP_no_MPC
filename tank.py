@@ -78,6 +78,16 @@ class Tank:
         else:
             return 0
 
+    @classmethod
+    def set_inflow_forecast_all(cls, forecast_rain):
+        for tank in Tank.all_tanks:
+            tank.set_inflow_forecast(forecast_rain)
+
+    @classmethod
+    def set_daily_demands_all(cls, demands_pd):
+        for tank in Tank.all_tanks:
+            tank.set_daily_demands(demands_pd)
+
     def calc_release(self, timestep, last_overflow):
         if timestep <= last_overflow:
             release_deg = self.releases[timestep // int(cfg.release_dt / cfg.dt)]

@@ -153,14 +153,16 @@ node21 = Node('node21', [outlet4], [pipe5])
 node2 = Node('node2', [pipe4, pipe5], [pipe6])
 outfall = Node('outfall', [pipe6])
 
+demands_PD = set_demands_per_dt()
+Tank.set_daily_demands_all(demands_PD)
+#for tank in Tank.all_tanks:
+   # tank.set_daily_demands(demands_PD)  # happens only once
+
 # Create forecast - currently real rain only!
 forecast_rain = set_rain_input('09-10.csv', cfg.rain_dt, cfg.sim_len)
-for tank in Tank.all_tanks:
-    tank.set_inflow_forecast(forecast_rain)  # happens once a forecast is made
+Tank.set_inflow_forecast_all(forecast_rain)  # happens once a forecast is made
 
-demands_PD = set_demands_per_dt()
-for tank in Tank.all_tanks:
-    tank.set_daily_demands(demands_PD)  # happens only once
+
 
 # starting main sim loop
 baseline = Scenario()
@@ -196,7 +198,6 @@ if optim == 'Y':
                            fitness_func=fitness_func,
                            on_generation=on_gen)
     ga_instance.run()
-init_pop = ga.pop_init(baseline.release_hour, len(Tank.all_tanks))
 #runtime.stop()
 print('d')
 
